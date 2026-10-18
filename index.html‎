@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Thi Trắc Nghiệm Luật Lao Động 2019 - 100 Câu</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #0066cc;
+            --border-color: #dee2e6;
+            --hover-bg: #f1f3f5;
+            --correct-bg: #d4edda;
+            --correct-text: #155724;
+            --wrong-bg: #f8d7da;
+            --wrong-text: #721c24;
+        }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --border-color: #333333;
+            --hover-bg: #2a2a2a;
+            --correct-bg: #1b382b;
+            --correct-text: #75d4a0;
+            --wrong-bg: #442024;
+            --wrong-text: #f5a4a8;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 20px; margin: 0; color: var(--primary-color); }
+        button, .btn {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e63946;
+            background: var(--hover-bg);
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .question-box { margin-bottom: 25px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; }
+        .options label {
+            display: block;
+            padding: 10px 12px;
+            margin: 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .options label:hover { background-color: var(--hover-bg); }
+        .options input { margin-right: 10px; }
+        .result-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+        .correct { background-color: var(--correct-bg); color: var(--correct-text); }
+        .wrong { background-color: var(--wrong-bg); color: var(--wrong-text); }
+        .explanation {
+            margin-top: 8px;
+            font-size: 13px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        .flex-group { display: flex; gap: 10px; margin-top: 15px; }
+    </style>
+</head>
+<body data-theme="dark">
+<div class="container">
+    <header>
+        <h1>Luyện Thi Trắc Nghiệm Luật Lao Động 2019 (100 Câu)</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Giao diện</button>
+    </header>
+
+    <!-- MÀN HÌNH CHỦ -->
+    <div id="home-screen" class="screen active">
+        <h2>Kho đề 100 câu chuẩn sát 7 chương! 🚀</h2>
+        <p>Hệ thống sẽ ngẫu nhiên lấy bộ **20 câu hỏi cho mỗi lần thi (30 phút)** để bạn luyện tập áp lực như phòng thi thật.</p>
+        <ul>
+            <li>Có đầy đủ giải thích chi tiết chiếu theo Bộ luật Lao động 2019.</li>
+            <li>Tự động lưu lại danh sách các câu bạn làm sai để ôn tập riêng.</li>
+        </ul>
+        <div class="flex-group" style="margin-top: 30px;">
+            <button onclick="startQuiz()">Bắt đầu thi thử (20 câu ngẫu nhiên)</button>
+            <button onclick="viewWrongQuestions()" style="background-color: #e63946;">Ôn lại câu hay sai (<span id="wrong-count">0</span>)</button>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH LÀM BÀI -->
+    <div id="quiz-screen" class="screen">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span id="progress-text" style="font-weight: bold;">Câu 1/20</span>
+            <div class="timer" id="timer-display">30:00</div>
+        </div>
+        <div id="question-container"></div>
+        <div class="flex-group">
+            <button id="prev-btn" onclick="prevQuestion()" style="background-color: #6c757d;">Câu trước</button>
+            <button id="next-btn" onclick="nextQuestion()">Câu tiếp theo</button>
+            <button id="submit-btn" onclick="submitQuiz()" style="background-color: #28a745; display:none;">Nộp bài</button>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH KẾT QUẢ -->
+    <div id="result-screen" class="screen">
+        <h2>Kết Quả Ôn Tập & Giải Chi Tiết</h2>
+        <p id="score-summary" style="font-size: 20px; font-weight: bold; margin: 15px 0;"></p>
+        <div id="review-container" style="max-height: 450px; overflow-y: auto; margin-bottom: 20px;"></div>
+        <button onclick="goHome()">Về trang chủ</button>
+    </div>
+</div>
+
+<script>
+    // Kho dữ liệu 100 câu hỏi bám sát 7 chương
+    const questionBank = [
+        // CHƯƠNG 1 & 2: Tổng quan & Quan hệ pháp luật
+        { q: "Quan hệ lao động bắt buộc phải có yếu tố cốt lõi nào sau đây?", options: ["Sự bình đẳng tuyệt đối về tài sản", "Sự lệ thuộc pháp lý giữa người lao động và người sử dụng lao động", "Tính chất thương mại vụ lợi thuần túy", "Sự chuyển dịch quyền sở hữu tư liệu sản xuất"], answer: 1, chapter: "Chương 1", exp: "Theo lý luận Luật Lao động, quan hệ lao động có tính chất lệ thuộc pháp lý (người lao động phải chịu sự quản lý, điều hành của người sử dụng lao động)." },
+        { q: "Theo Bộ luật Lao động 2019, người lao động là người từ đủ bao nhiêu tuổi trở lên?", options: ["Đủ 13 tuổi", "Đủ 15 tuổi", "Đủ 18 tuổi", "Đủ 16 tuổi"], answer: 1, chapter: "Chương 2", exp: "Căn cứ Điều 2 Bộ luật Lao động 2019, người lao động là người từ đủ 15 tuổi trở lên." },
+        { q: "Chủ thể nào sau đây không phải là người sử dụng lao động theo BLLĐ 2019?", options: ["Doanh nghiệp", "Cơ quan, tổ chức", "Hợp tác xã", "Hộ gia đình không có thuê mướn lao động"], answer: 3, chapter: "Chương 2", exp: "Hộ gia đình phải có thuê mướn, sử dụng lao động thì mới là người sử dụng lao động." },
+        { q: "Nguyên tắc cơ bản nào của Luật Lao động bảo vệ quyền lợi về việc làm?", options: ["Quyền làm việc, tự do lựa chọn việc làm", "Phải làm việc suốt đời cho một cơ quan", "Cấm người lao động nhảy việc", "Nhà nước ấn định mọi công việc"], answer: 0, chapter: "Chương 1", exp: "Điều 4 quy định rõ quyền làm việc, tự do lựa chọn việc làm và nghề nghiệp của người lao động." },
+        { q: "Đối tượng điều chỉnh của Luật Lao động Việt Nam là gì?", options: ["Toàn bộ quan hệ xã hội phát sinh trong xã hội", "Quan hệ lao động thuê mướn và các quan hệ liên quan trực tiếp đến quan hệ lao động", "Chỉ quan hệ công chức nhà nước", "Quan hệ hợp đồng dịch vụ dân sự"], answer: 1, chapter: "Chương 1", exp: "Luật Lao động điều chỉnh quan hệ lao động thuê mướn và các quan hệ xã hội liên quan trực tiếp đến quan hệ lao động." },
+        { q: "Phương pháp điều chỉnh đặc thù của Luật Lao động là gì?", options: ["Phương pháp mệnh lệnh tuyệt đối", "Phương pháp bình đẳng thỏa thuận kết hợp với sự tham gia của tổ chức đại diện và quyền quản lý điều hành", "Phương pháp tự định đoạt hoàn toàn", "Phương pháp xử phạt hành chính"], answer: 1, chapter: "Chương 1", exp: "Luật Lao động kết hợp hài hòa giữa thỏa thuận (hợp đồng) và quyền quản lý, mệnh lệnh hợp pháp của người sử dụng lao động." },
+        { q: "Nguồn của Luật Lao động Việt Nam bao gồm văn bản nào có hiệu lực pháp lý cao nhất?", options: ["Bộ luật Lao động", "Hiến pháp", "Nghị định của Chính phủ", "Thông tư của Bộ LĐTBXH"], answer: 1, chapter: "Chương 1", exp: "Hiến pháp là đạo luật gốc có hiệu lực pháp lý cao nhất trong hệ thống pháp luật." },
+        { q: "Quan hệ pháp luật nào sau đây là quan hệ có liên quan trực tiếp đến quan hệ lao động?", options: ["Quan hệ học nghề, tập nghề", "Quan hệ mua bán nhà ở", "Quan hệ thừa kế tài sản", "Quan hệ tố tụng dân sự"], answer: 0, chapter: "Chương 2", exp: "Quan hệ học nghề, tập nghề là quan hệ xã hội gắn liền và là tiền đề của quan hệ lao động." },
+        { q: "Người sử dụng lao động là cá nhân khi giao kết hợp đồng lao động phải có năng lực gì?", options: ["Năng lực hành vi dân sự đầy đủ", "Đủ 15 tuổi trở lên", "Được cấp bằng đại học", "Không bị phá sản"], answer: 0, chapter: "Chương 2", exp: "Cá nhân là người sử dụng lao động phải có năng lực hành vi dân sự đầy đủ." },
+        { q: "Lịch sử phát triển Luật Lao động Việt Nam gắn liền với mốc ra đời của sắc lệnh nào trong thời kỳ kháng chiến?", options: ["Các sắc lệnh về lao động của Chủ tịch Hồ Chí Minh (1945-1946)", "Bộ luật dân sự đầu tiên", "Luật đất đai", "Luật doanh nghiệp"], answer: 0, chapter: "Chương 1", exp: "Ngay sau Cách mạng tháng Tám, Chủ tịch Hồ Chí Minh đã ký nhiều sắc lệnh bảo vệ quyền lợi người lao động." },
+
+        // CHƯƠNG 3: Tổ chức đại diện các bên
+        { q: "Tổ chức đại diện người lao động tại cơ sở bao gồm những tổ chức nào?", options: ["Chỉ có Công đoàn cơ sở", "Công đoàn cơ sở và Tổ chức của người lao động tại doanh nghiệp", "Hội chữ thập đỏ", "Đoàn thanh niên cộng sản Hồ Chí Minh"], answer: 1, chapter: "Chương 3", exp: "Căn cứ Chương XII, tổ chức đại diện NLĐ tại cơ sở gồm Công đoàn cơ sở và tổ chức của người lao động tại doanh nghiệp." },
+        { q: "Tổ chức đại diện người sử dụng lao động trung ương tại Việt Nam nổi bật hiện nay là tổ chức nào?", options: ["Phòng Thương mại và Công nghiệp Việt Nam (VCCI)...", "Tổng Liên đoàn Lao động", "Hội sinh viên", "Mặt trận Tổ quốc"], answer: 0, chapter: "Chương 3", exp: "VCCI là tổ chức đại diện quốc gia của người sử dụng lao động." },
+        { q: "Quyền nào sau đây thuộc về tổ chức đại diện người lao động tại cơ sở?", options: ["Đại diện cho người lao động thương lượng tập thể", "Tự ý ra quyết định sa thải giám đốc", "Đóng cửa doanh nghiệp khi không thích", "Phân phối lợi nhuận cổ đông"], answer: 0, chapter: "Chương 3", exp: "Tổ chức đại diện NLĐ bảo vệ quyền lợi hợp pháp và tiến hành thương lượng tập thể." },
+        { q: "Thành lập tổ chức của người lao động tại doanh nghiệp phải tuân thủ điều kiện gì?", options: ["Được cơ quan nhà nước có thẩm quyền đăng ký", "Không cần đăng ký", "Phải được Thủ tướng phê duyệt", "Phải có 1000 thành viên trở lên"], answer: 0, chapter: "Chương 3", exp: "Tổ chức của người lao động tại doanh nghiệp phải được cơ quan nhà nước đăng ký theo quy định pháp luật." },
+        { q: "Hình thức thương lượng giữa đại diện các bên trong quan hệ lao động không bao gồm hình thức nào?", options: ["Thương lượng tập thể", "Đối thoại tại nơi làm việc", "Đình công đơn phương không cần thương lượng", "Giải quyết tranh chấp lao động"], answer: 2, chapter: "Chương 3", exp: "Đình công không phải là hình thức thương lượng mà là biện pháp giải quyết tranh chấp lao động tập thể." },
+        { q: "Đại diện người sử dụng lao động có quyền gì khi tham gia quan hệ lao động?", options: ["Tham gia xây dựng quan hệ lao động hài hòa, ổn định", "Tự ý hạ lương người lao động dưới mức tối thiểu", "Cấm nhân viên khiếu nại", "Giải tán công đoàn bất cứ lúc nào"], answer: 0, chapter: "Chương 3", exp: "NSDLĐ có quyền tham gia thương lượng, xây dựng quan hệ lao động tiến bộ." },
+        { q: "Mối quan hệ giữa Công đoàn và người sử dụng lao động tại doanh nghiệp dựa trên nguyên tắc nào?", options: ["Hợp tác, tôn trọng lẫn nhau và tuân thủ pháp luật", "Đối đầu tuyệt đối", "Cấp trên áp đặt hoàn toàn", "Mạnh vì gạo bạo vì tiền"], answer: 0, chapter: "Chương 3", exp: "Nguyên tắc hợp tác và thiện chí là cốt lõi trong quan hệ lao động tập thể." },
+        { q: "Cơ quan nào có thẩm quyền quản lý nhà nước về đăng ký tổ chức của người lao động tại doanh nghiệp?", options: ["Ủy ban nhân dân cấp tỉnh", "Bộ Công an", "Bộ Quốc phòng", "Tòa án nhân dân tối cao"], answer: 0, chapter: "Chương 3", exp: "UBND cấp tỉnh chịu trách nhiệm về việc đăng ký tổ chức của người lao động tại cơ sở." },
+        { q: "Hành vi nào bị nghiêm cấm đối với tổ chức đại diện người lao động?", options: ["Can thiệp vào công tác thành lập, điều hành của người sử dụng lao động", "Bảo vệ quyền lợi đoàn viên", "Tổ chức đối thoại", "Kiến nghị chính sách"], answer: 0, chapter: "Chương 3", exp: "Pháp luật nghiêm cấm các bên can thiệp trái pháp luật vào nội bộ của nhau." },
+        { q: "Vai trò chính của tổ chức đại diện người sử dụng lao động là gì?", options: ["Bảo vệ quyền và lợi ích hợp pháp của người sử dụng lao động", "Bảo vệ quyền đình công của công nhân", "Quản lý thuế doanh nghiệp", "Thay thế cơ quan thanh tra lao động"], answer: 0, chapter: "Chương 3", exp: "Tổ chức đại diện NSDLĐ bảo vệ quyền lợi ích hợp pháp cho các thành viên sử dụng lao động." },
+
+        // CHƯƠNG 4: Việc làm và Cho thuê lại lao động
+        { q: "Doanh nghiệp hoạt động cho thuê lại lao động bắt buộc phải có điều kiện gì?", options: ["Phải được cấp Giấy phép hoạt động cho thuê lại lao động và ký quỹ", "Không cần điều kiện gì", "Chỉ cần đăng ký kinh doanh tạp hóa", "Phải là doanh nghiệp 100% vốn nhà nước"], answer: 0, chapter: "Chương 4", exp: "Căn cứ Điều 54, cho thuê lại lao động là ngành nghề kinh doanh có điều kiện (Giấy phép và ký quỹ)." },
+        { q: "Thời hạn tối đa cho thuê lại lao động đối với một người lao động là bao lâu?", options: ["12 tháng", "6 tháng", "24 tháng", "Không giới hạn"], answer: 0, chapter: "Chương 4", exp: "Thời hạn cho thuê lại lao động tối đa là 12 tháng đối với mỗi người lao động." },
+        { q: "Hành vi nào bị nghiêm cấm trong hoạt động cho thuê lại lao động?", options: ["Thu phí cho thuê lại lao động từ phía người lao động", "Ký hợp đồng bằng văn bản", "Báo cáo định kỳ", "Đóng bảo hiểm xã hội"], answer: 0, chapter: "Chương 4", exp: "Cấm thu tiền dịch vụ hoặc phí cho thuê lại lao động từ người lao động." },
+        { q: "Người lao động làm việc theo hình thức cho thuê lại có quyền hưởng tiền lương như thế nào so với người lao động của bên thuê lại?", options: ["Không được thấp hơn", "Phải thấp hơn 50%", "Tùy ý doanh nghiệp cho thuê", "Bằng mức tối thiểu chung"], answer: 0, chapter: "Chương 4", exp: "Tiền lương của người lao động thuê lại không được thấp hơn tiền lương của người lao động của bên thuê lại có cùng trình độ." },
+        { q: "Giải quyết việc làm thuộc trách nhiệm của ai theo pháp luật lao động?", options: ["Nhà nước, doanh nghiệp và toàn xã hội", "Chỉ cá nhân người lao động tự lo", "Chỉ có Bộ Lao động", "Công an nhân dân"], answer: 0, chapter: "Chương 4", exp: "Giải quyết việc làm là chính sách kinh tế - xã hội quan trọng của Nhà nước và toàn xã hội." },
+        { q: "Doanh nghiệp cho thuê lại lao động phải ký quỹ tại ngân hàng số tiền là bao nhiêu?", options: ["2 tỷ đồng", "500 triệu đồng", "5 tỷ đồng", "100 triệu đồng"], answer: 0, chapter: "Chương 4", exp: "Theo Nghị định hướng dẫn BLLĐ, mức ký quỹ cho thuê lại lao động hiện tại là 2 tỷ đồng." },
+        { q: "Bên thuê lại lao động có được chuyển người lao động thuê lại cho người khác sử dụng không?", options: ["Không được", "Được phép thoải mái", "Được nếu hai bên đồng ý miệng", "Được sau khi báo cáo công an"], answer: 0, chapter: "Chương 4", exp: "Bên thuê lại không được chuyển người lao động cho người sử dụng lao động khác." },
+        { q: "Việc làm được hiểu là gì trong pháp luật lao động?", options: ["Hoạt động lao động tạo ra thu nhập mà không bị pháp luật cấm", "Mọi hoạt động chân tay", "Chỉ công việc làm trong cơ quan nhà nước", "Việc làm không có lương"], answer: 0, chapter: "Chương 4", exp: "Định nghĩa việc làm tại Điều 9: Hoạt động lao động mang lại thu nhập hợp pháp." },
+        { q: "Khi chấm dứt hợp đồng lao động thuê lại, ai là người chịu trách nhiệm trả trợ cấp thôi việc?", options: ["Doanh nghiệp cho thuê lại lao động", "Bên thuê lại lao động", "Ủy ban nhân dân", "Quỹ bảo hiểm xã hội"], answer: 0, chapter: "Chương 4", exp: "Doanh nghiệp cho thuê lại lao động là người sử dụng lao động chính nên chịu trách nhiệm với NLĐ." },
+        { q: "Hợp đồng cho thuê lại lao động phải được lập thành mấy bản?", options: ["Lập thành văn bản thành nhiều bản", "Chỉ cần thỏa thuận miệng", "Ghi âm lại là đủ", "Lập thành 1 bản lưu tại cơ quan thuế"], answer: 0, chapter: "Chương 4", exp: "Hợp đồng cho thuê lại lao động phải được lập thành văn bản." },
+
+        // CHƯƠNG 5: Hợp đồng lao động (Trọng tâm lớn)
+        { q: "Hợp đồng lao động có thời hạn từ đủ 1 tháng trở lên phải được giao kết theo hình thức nào?", options: ["Phải bằng văn bản", "Bằng lời nói", "Bằng tin nhắn SMS", "Bằng hành vi mặc nhiên"], answer: 0, chapter: "Chương 5", exp: "Căn cứ Điều 14, hợp đồng từ 1 tháng trở lên bắt buộc phải lập thành văn bản." },
+        { q: "Thời gian thử việc tối đa đối với công việc có chức danh nghề nghiệp cần trình độ chuyên môn kỹ thuật từ cao đẳng trở lên là bao nhiêu ngày?", options: ["60 ngày", "30 ngày", "180 ngày", "15 ngày"], answer: 0, chapter: "Chương 5", exp: "Căn cứ Điều 25, thử việc tối đa 60 ngày đối với công việc yêu cầu trình độ cao đẳng trở lên." },
+        { q: "Tiền lương thử việc theo Điều 26 ít nhất phải bằng bao nhiêu phần trăm mức lương của công việc đó?", options: ["85%", "50%", "70%", "100%"], answer: 0, chapter: "Chương 5", exp: "Tiền lương thử việc ít nhất bằng 85% mức lương của công việc đó." },
+        { q: "Khi người lao động đơn phương chấm dứt hợp đồng lao động không xác định thời hạn, họ phải báo trước ít nhất bao nhiêu ngày?", options: ["45 ngày", "30 ngày", "3 ngày làm việc", "90 ngày"], answer: 0, chapter: "Chương 5", exp: "Căn cứ điểm a khoản 1 Điều 35, hợp đồng không xác định thời hạn phải báo trước ít nhất 45 ngày." },
+        { q: "Khi người lao động đơn phương chấm dứt hợp đồng xác định thời hạn (12-36 tháng), phải báo trước ít nhất bao nhiêu ngày?", options: ["30 ngày", "45 ngày", "3 ngày làm việc", "10 ngày"], answer: 0, chapter: "Chương 5", exp: "Hợp đồng xác định thời hạn từ 12 đến 36 tháng phải báo trước ít nhất 30 ngày." },
+        { q: "Trường hợp hợp đồng lao động dưới 12 tháng, khi người lao động muốn đơn phương chấm dứt thì phải báo trước ít nhất bao nhiêu ngày làm việc?", options: ["Ít nhất 3 ngày làm việc", "30 ngày", "Không cần báo trước", "15 ngày"], answer: 0, chapter: "Chương 5", exp: "Hợp đồng dưới 12 tháng phải báo trước ít nhất 3 ngày làm việc (khoản 1 Điều 35)." },
+        { q: "Người lao động được quyền đơn phương chấm dứt hợp đồng không cần báo trước trong trường hợp nào sau đây?", options: ["Không được trả đủ lương hoặc trả lương không đúng hạn", "Thích nghỉ thì nghỉ", "Doanh nghiệp chuyển địa điểm cùng tỉnh", "Công ty tăng ca 1 ngày/tuần"], answer: 0, chapter: "Chương 5", exp: "Điểm b khoản 2 Điều 35 quy định NLĐ được nghỉ không cần báo trước nếu không được trả đủ lương." },
+        { q: "Người sử dụng lao động không được quyền đơn phương chấm dứt hợp đồng lao động với người lao động trong trường hợp nào?", options: ["Người lao động đang ốm đau hoặc tai nạn đang điều trị theo quyết định của bác sĩ", "Người lao động đi muộn 3 lần trong tháng", "Người lao động không hoàn thành công việc", "Doanh nghiệp bị thu hẹp sản xuất"], answer: 0, chapter: "Chương 5", exp: "Căn cứ Điều 37, NSDLĐ không được đơn phương chấm dứt hợp đồng khi NLĐ ốm đau, tai nạn đang điều trị." },
+        { q: "Mức trợ cấp thôi việc cứ mỗi năm làm việc được tính bằng mấy tháng tiền lương?", options: ["0,5 tháng tiền lương", "1 tháng tiền lương", "2 tháng tiền lương", "3 tháng tiền lương"], answer: 0, chapter: "Chương 5", exp: "Căn cứ Điều 46, trợ cấp thôi việc bằng 0,5 tháng tiền lương cho mỗi năm làm việc." },
+        { q: "Thời gian thử việc tối đa đối với công việc bình thường (không đòi hỏi chuyên môn cao) là bao nhiêu ngày?", options: ["30 ngày", "60 ngày", "6 ngày", "10 ngày"], answer: 0, chapter: "Chương 5", exp: "Công việc có chức danh bình thường thời gian thử việc tối đa là 30 ngày (Điều 25)." },
+        { q: "Hợp đồng lao động dưới 1 tháng có thể giao kết bằng hình thức nào?", options: ["Lời nói hoặc văn bản", "Bắt buộc văn bản công chứng", "Chỉ được bằng văn bản", "Chỉ qua thư tín"], answer: 0, chapter: "Chương 5", exp: "Hợp đồng dưới 1 tháng có thể giao kết bằng lời nói (trừ một số trường hợp với người dưới 15 tuổi...)." },
+        { q: "Khi chấm dứt hợp đồng lao động, trong thời hạn bao lâu kể từ ngày chấm dứt, hai bên phải thanh toán đầy đủ các khoản tiền liên quan?", options: ["14 ngày làm việc", "30 ngày", "7 ngày", "3 ngày"], answer: 0, chapter: "Chương 5", exp: "Căn cứ khoản 1 Điều 48, thời hạn thanh toán các khoản tiền là 14 ngày làm việc (có thể kéo dài đến 30 ngày trong một số trường hợp đặc biệt)." },
+        { q: "Hành vi người sử dụng lao động giữ bản chính giấy tờ tùy thân của người lao động khi giao kết hợp đồng có bị cấm không?", options: ["Bị nghiêm cấm tuyệt đối", "Được phép giữ để làm tin", "Được giữ nếu người lao động đồng ý", "Chỉ giữ CMND/CCCD"], answer: 0, chapter: "Chương 5", exp: "Căn cứ khoản 2 Điều 16, NSDLĐ tuyệt đối không được giữ giấy tờ tùy thân, văn bằng, chứng chỉ của NLĐ." },
+        { q: "Người lao động làm việc theo hợp đồng lao động xác định thời hạn có quyền chuyển đổi thành hợp đồng không xác định thời hạn khi nào?", options: ["Khi ký tiếp hợp đồng xác định thời hạn lần thứ hai mà vẫn tiếp tục làm việc", "Sau 3 tháng làm việc", "Tự động sau 1 năm", "Không được chuyển đổi"], answer: 0, chapter: "Chương 5", exp: "Căn cứ điểm c khoản 2 Điều 20, ký tiếp lần 2 thì hợp đồng tiếp theo phải là không xác định thời hạn (với một số ngoại lệ)." },
+        { q: "Khi người sử dụng lao động đơn phương chấm dứt hợp đồng trái pháp luật, họ phải trả tiền lương trong những ngày người lao động không được làm việc cộng với ít nhất bao nhiêu tháng tiền lương?", options: ["Ít nhất 2 tháng tiền lương", "Ít nhất 1 tháng tiền lương", "Ít nhất 6 tháng tiền lương", "Không phải bồi thường"], answer: 0, chapter: "Chương 5", exp: "Căn cứ khoản 1 Điều 41, NSDLĐ phải bồi thường tiền lương những ngày không được làm việc + ít nhất 2 tháng tiền lương." },
+
+        // CHƯƠNG 6: Đối thoại, thương lượng tập thể, thỏa ước lao động tập thể
+        { q: "Thỏa ước lao động tập thể phải được thông qua tại Đại hội lao động với tỷ lệ biểu quyết tán thành tối thiểu là bao nhiêu?", options: ["Trên 50% số người tham gia", "100% tuyệt đối", "Đúng 30%", "Trên 80% tổng số doanh nghiệp"], answer: 0, chapter: "Chương 6", exp: "Căn cứ Điều 77, TƯLĐTT phải được trên 50% số người của tổ chức đại diện NLĐ hoặc người lao động tham gia biểu quyết tán thành." },
+        { q: "Thời hạn tối đa của thỏa ước lao động tập thể là bao lâu?", options: ["Từ 1 năm đến 3 năm", "5 năm", "6 tháng", "Không giới hạn"], answer: 0, chapter: "Chương 6", exp: "Căn cứ Điều 79, thời hạn của TƯLĐTT là từ 01 năm đến 03 năm." },
+        { q: "Đối thoại tại nơi làm việc định kỳ phải được tổ chức ít nhất bao lâu một lần?", options: ["Ít nhất 1 năm một lần", "1 tháng một lần", "3 năm một lần", "Không bắt buộc định kỳ"], answer: 0, chapter: "Chương 6", exp: "Căn cứ Nghị định hướng dẫn, đối thoại định kỳ tại nơi làm việc ít nhất 01 năm một lần." },
+        { q: "Chủ thể nào tiến hành thương lượng tập thể tại cấp doanh nghiệp?", options: ["Đại diện người sử dụng lao động và tổ chức đại diện người lao động tại cơ sở", "Chỉ có cơ quan nhà nước", "Tòa án lao động", "Liên đoàn lao động tỉnh"], answer: 0, chapter: "Chương 6", exp: "Thương lượng tập thể diễn ra giữa NSDLĐ và tổ chức đại diện NLĐ tại cơ sở." },
+        { q: "Thỏa ước lao động tập thể sau khi ký kết phải được gửi cho cơ quan nào?", options: ["Cơ quan chuyên môn về lao động thuộc Ủy ban nhân dân cấp tỉnh", "Bộ Công an", "Tòa án nhân dân", "Cục thuế"], answer: 0, chapter: "Chương 6", exp: "Căn cứ Điều 81, trong thời hạn 10 ngày kể từ ngày ký, TƯLĐTT phải được gửi cho cơ quan chuyên môn về lao động cấp tỉnh." },
+        { q: "Nội dung của thỏa ước lao động tập thể có được trái với quy định của pháp luật lao động không?", options: ["Không được trái, phải phù hợp với pháp luật và có lợi hơn cho người lao động", "Được phép trái nếu hai bên đồng ý", "Được trái trong mọi trường hợp", "Do giám đốc quyết định"], answer: 0, chapter: "Chương 6", exp: "Điều 70 quy định nội dung TƯLĐTT không được trái với quy định pháp luật và khuyến khích có lợi hơn cho NLĐ." },
+        { q: "Khi nào thỏa ước lao động tập thể có hiệu lực thi hành nếu các bên không có thỏa thuận khác?", options: ["Từ ngày các bên ký kết", "Sau 30 ngày đăng ký", "Sau 1 năm", "Khi Chủ tịch nước phê duyệt"], answer: 0, chapter: "Chương 6", exp: "Căn cứ Điều 78, hiệu lực của TƯLĐTT tính từ ngày các bên thỏa thuận ký kết." },
+        { q: "Trong thời hạn bao lâu trước ngày thỏa ước lao động tập thể hết hạn, hai bên có thể tiến hành thương lượng để kéo dài hoặc ký mới?", options: ["Trước thời hạn hết hạn thỏa ước", "Trước 1 ngày", "Không được thương lượng lại", "Sau khi hết hạn 1 tháng"], answer: 0, chapter: "Chương 6", exp: "Các bên có thể thương lượng sửa đổi, bổ sung hoặc ký mới TƯLĐTT khi sắp hết hạn." },
+        { q: "Việc tổ chức đối thoại tại nơi làm việc nhằm mục đích gì?", options: ["Chia sẻ thông tin, tăng cường sự hiểu biết chung giữa các bên", "Giải quyết tranh chấp hình sự", "Bầu cử hội đồng quản trị", "Xử lý hình sự người lao động"], answer: 0, chapter: "Chương 6", exp: "Đối thoại tại nơi làm việc giúp xây dựng quan hệ lao động hài hòa thông qua trao đổi thông tin." },
+        { q: "Quyền yêu cầu thương lượng tập thể thuộc về chủ thể nào?", options: ["Cả tổ chức đại diện người lao động và người sử dụng lao động", "Chỉ có người sử dụng lao động", "Chỉ có nhà nước", "Chỉ có công đoàn cấp trên"], answer: 0, chapter: "Chương 6", exp: "Cả hai bên trong quan hệ lao động đều có quyền yêu cầu thương lượng tập thể." },
+
+        // CHƯƠNG 7: Thời giờ làm việc, thời giờ nghỉ ngơi (Trọng tâm cực cao)
+        { q: "Thời giờ làm việc bình thường theo Bộ luật Lao động 2019 không quá bao nhiêu giờ trong một ngày?", options: ["Không quá 8 giờ trong 1 ngày", "Không quá 10 giờ trong 1 ngày", "Không quá 12 giờ trong 1 ngày", "Không quá 6 giờ trong 1 ngày"], answer: 0, chapter: "Chương 7", exp: "Căn cứ Điều 105, thời giờ làm việc bình thường không quá 8 giờ/ngày và 48 giờ/tuần." },
+        { q: "Tổng số giờ làm thêm của người lao động trong một năm (trường hợp bình thường) tối đa là bao nhiêu?", options: ["200 giờ", "100 giờ", "300 giờ", "500 giờ"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm b khoản 2 Điều 107, số giờ làm thêm tối đa trong năm là 200 giờ (trừ trường hợp đặc biệt được 300 giờ)." },
+        { q: "Người lao động làm việc đủ 12 tháng cho một người sử dụng lao động trong điều kiện bình thường được nghỉ hằng năm hưởng nguyên lương mấy ngày?", options: ["12 ngày làm việc", "10 ngày làm việc", "14 ngày làm việc", "16 ngày làm việc"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm a khoản 1 Điều 113, điều kiện bình thường được nghỉ hằng năm 12 ngày làm việc." },
+        { q: "Cứ đủ bao nhiêu năm làm việc cho một người sử dụng lao động thì số ngày nghỉ hằng năm được tăng thêm tương ứng 1 ngày?", options: ["Cứ đủ 5 năm", "Cứ đủ 3 năm", "Cứ đủ 2 năm", "Cứ đủ 10 năm"], answer: 0, chapter: "Chương 7", exp: "Căn cứ Điều 114, cứ đủ 5 năm làm việc thâm niên thì được tăng thêm 1 ngày phép năm." },
+        { q: "Số ngày nghỉ lễ Quốc khánh (2/9) hưởng nguyên lương theo BLLĐ 2019 là bao nhiêu ngày?", options: ["2 ngày", "1 ngày", "3 ngày", "4 ngày"], answer: 0, chapter: "Chương 7", exp: "Điểm đ khoản 1 Điều 112 quy định dịp Quốc khánh nghỉ 2 ngày (ngày 2/9 và 1 ngày liền kề trước hoặc sau)." },
+        { q: "Tổng số ngày nghỉ lễ, tết trong năm hưởng nguyên lương (tính cả Quốc khánh 2 ngày) là bao nhiêu ngày?", options: ["11 ngày", "10 ngày", "12 ngày", "15 ngày"], answer: 0, chapter: "Chương 7", exp: "Căn cứ Điều 112, tổng số ngày nghỉ lễ tết trong năm là 11 ngày." },
+        { q: "Người lao động làm việc ban đêm được trả thêm tiền lương ít nhất bằng bao nhiêu phần trăm so với tiền lương tính theo đơn giá tiền lương hoặc tiền lương thực trả của ngày làm việc bình thường?", options: ["Ít nhất bằng 30%", "Ít nhất bằng 20%", "Ít nhất bằng 50%", "Ít nhất bằng 100%"], answer: 0, chapter: "Chương 7", exp: "Căn cứ Điều 109, làm việc ban đêm được trả thêm ít nhất bằng 30%." },
+        { q: "Làm thêm giờ vào ngày nghỉ hằng tuần (chủ nhật), người lao động được trả lương ít nhất bằng bao nhiêu phần trăm tiền lương của ngày làm việc bình thường?", options: ["Ít nhất bằng 200%", "Ít nhất bằng 150%", "Ít nhất bằng 300%", "Ít nhất bằng 100%"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm b khoản 1 Điều 98, làm thêm ngày nghỉ hằng tuần tính ít nhất 200%." },
+        { q: "Làm thêm giờ vào ngày lễ, tết, ngày nghỉ có hưởng lương, người lao động được trả lương ít nhất bằng bao nhiêu phần trăm?", options: ["Ít nhất bằng 300% (chưa kể tiền lương ngày lễ, tết có hưởng lương đối với NLĐ hưởng lương ngày)", "Ít nhất bằng 200%", "Ít nhất bằng 150%", "Ít nhất bằng 100%"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm c khoản 1 Điều 98, làm thêm ngày lễ tết ít nhất bằng 300%." },
+        { q: "Người lao động làm việc theo chế độ ca đêm được xác định trong khoảng thời gian nào?", options: ["Từ 22 giờ đến 6 giờ sáng hôm sau", "Từ 21 giờ đến 5 giờ sáng hôm sau", "Từ 23 giờ đến 7 giờ sáng hôm sau", "Từ 20 giờ đến 4 giờ sáng hôm sau"], answer: 0, chapter: "Chương 7", exp: "Căn cứ Điều 106, giờ làm việc ban đêm tính từ 22 giờ đến 6 giờ sáng hôm sau." },
+        { q: "Người lao động làm công việc nặng nhọc, độc hại, nguy hiểm khi đủ 12 tháng làm việc được nghỉ phép năm bao nhiêu ngày?", options: ["14 ngày làm việc", "12 ngày làm việc", "16 ngày làm việc", "20 ngày làm việc"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm b khoản 1 Điều 113, công việc nặng nhọc độc hại được nghỉ 14 ngày." },
+        { q: "Người lao động làm công việc đặc biệt nặng nhọc, độc hại, nguy hiểm được nghỉ phép năm bao nhiêu ngày?", options: ["16 ngày làm việc", "14 ngày làm việc", "12 ngày làm việc", "18 ngày làm việc"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm c khoản 1 Điều 113, công việc đặc biệt nặng nhọc độc hại được nghỉ 16 ngày." },
+        { q: "Trong một ngày, số giờ làm thêm tối đa không quá bao nhiêu phần trăm số giờ làm việc bình thường?", options: ["Không quá 50% số giờ làm việc bình thường", "Không quá 100%", "Không quá 30%", "Không quá 200%"], answer: 0, chapter: "Chương 7", exp: "Căn cứ điểm a khoản 2 Điều 107, số giờ làm thêm trong ngày không quá 50% số giờ làm việc bình thường." },
+        { q: "Người lao động làm việc theo thời giờ làm việc rút ngắn (đối với công việc nặng nhọc) do ai quy định?", options: ["Do pháp luật quy định hoặc thỏa thuận trong thỏa ước", "Do giám đốc tự quyết định", "Do người lao động tự ý nghỉ", "Do công đoàn tỉnh quyết định"], answer: 0, chapter: "Chương 7", exp: "Thời giờ làm việc rút ngắn áp dụng cho công việc nặng nhọc theo quy định pháp luật hoặc TƯLĐTT." },
+        { q: "Nghỉ hằng tuần, người lao động được nghỉ ít nhất bao nhiêu giờ liên tục trong mỗi tuần?", options: ["Ít nhất 24 giờ liên tục", "Ít nhất 12 giờ liên tục", "Đúng 48 giờ", "Đúng 8 giờ"], answer: 0, chapter: "Chương 7", exp: "Căn cứ khoản 2 Điều 111, mỗi tuần NLĐ được nghỉ ít nhất 24 giờ liên tục." },
+
+        // CÁC CÂU BỔ SUNG ĐỂ ĐẠT ĐỦ 100 CÂU (Trải đều các chương)
+        { q: "Hình thức xử lý kỷ luật lao động cao nhất theo BLLĐ 2019 là gì?", options: ["Sa thải", "Kéo dài thời hạn nâng lương", "Cách chức", "Khiển trách"], answer: 0, chapter: "Chương 10 (Mở rộng)", exp: "Căn cứ Điều 124, các hình thức xử lý kỷ luật gồm: khiển trách, kéo dài thời hạn nâng lương không quá 6 tháng, cách chức, sa thải." },
+        { q: "Thời hiệu xử lý kỷ luật lao động tối đa là bao nhiêu tháng kể từ ngày xảy ra hành vi vi phạm?", options: ["Tối đa 6 tháng (trường hợp liên quan đến tài chính, tài sản là 12 tháng)", "3 tháng", "12 tháng cho mọi trường hợp", "24 tháng"], answer: 0, chapter: "Chương 10 (Mở rộng)", exp: "Căn cứ khoản 1 Điều 123, thời hiệu xử lý kỷ luật là 6 tháng, riêng tài chính/tài sản/bí mật công nghệ là 12 tháng." },
+        { q: "Tiền lương của người lao động trong thời gian thử việc do hai bên thỏa thuận nhưng ít nhất bằng mấy phần trăm mức lương chính?", options: ["85%", "70%", "100%", "50%"], answer: 0, chapter: "Chương 5", exp: "Điều 26 quy định lương thử việc ít nhất bằng 85%." },
+        { q: "Tranh chấp lao động cá nhân bao gồm tranh chấp giữa ai với ai?", options: ["Giữa người lao động với người sử dụng lao động", "Giữa công đoàn với nhà nước", "Giữa doanh nghiệp với tòa án", "Giữa các doanh nghiệp với nhau"], answer: 0, chapter: "Chương 14 (Mở rộng)", exp: "Tranh chấp lao động cá nhân là tranh chấp giữa NLĐ với NSDLĐ." },
+        { q: "Thẩm quyền giải quyết tranh chấp lao động cá nhân đầu tiên ở cơ sở thường thông qua ai?", options: ["Hòa giải viên lao động", "Chủ tịch UBND tỉnh", "Công an huyện", "Bộ trưởng Bộ LĐTBXH"], answer: 0, chapter: "Chương 14 (Mở rộng)", exp: "Tranh chấp cá nhân phần lớn phải qua hòa giải viên lao động cơ sở (trừ một số trường hợp không bắt buộc hòa giải)." },
+        { q: "Đình công là sự ngừng việc tạm thời, tự nguyện và có tổ chức của ai?", options: ["Của người lao động", "Của người sử dụng lao động", "Của cơ quan nhà nước", "Của thanh tra lao động"], answer: 0, chapter: "Chương 14 (Mở rộng)", exp: "Đình công là quyền của tập thể người lao động." },
+        { q: "Hành vi nào sau đây bị nghiêm cấm khi đình công?", options: ["Cản trở người lao động không đình công đi làm", "Ngừng việc", "Nêu yêu sách", "Tập trung tại địa điểm quy định"], answer: 0, chapter: "Chương 14 (Mở rộng)", exp: "Cấm cản trở người lao động không đình công thực hiện quyền làm việc." },
+        { q: "Lao động nữ làm việc trong thời gian hành kinh được nghỉ mỗi ngày bao nhiêu phút?", options: ["Ít nhất 30 phút", "Ít nhất 60 phút", "15 phút", "Không được nghỉ"], answer: 0, chapter: "Chương 10 (Mở rộng)", exp: "Căn cứ khoản 4 Điều 137, lao động nữ trong thời gian hành kinh được nghỉ mỗi ngày ít nhất 30 phút." },
+        { q: "Lao động nữ nuôi con dưới 12 tháng tuổi được nghỉ mỗi ngày bao nhiêu phút để cho con bú?", options: ["Ít nhất 60 phút", "Ít nhất 30 phút", "120 phút", "Không được nghỉ"], answer: 0, chapter: "Chương 10 (Mở rộng)", exp: "Căn cứ khoản 2 Điều 137, lao động nữ nuôi con dưới 12 tháng tuổi được nghỉ mỗi ngày 60 phút." },
+        { q: "Người sử dụng lao động có được sử dụng người lao động dưới 15 tuổi làm việc quá sức không?", options: ["Nghiêm cấm sử dụng lao động dưới 15 tuổi làm việc nặng nhọc, độc hại, nguy hiểm", "Được phép nếu trả lương cao", "Được phép vào ban đêm", "Không cấm"], answer: 0, chapter: "Chương 11 (Mở rộng)", exp: "Pháp luật bảo vệ nghiêm ngặt lao động chưa thành niên, cấm việc nặng nhọc độc hại." },
+        { q: "Trợ cấp mất việc làm được tính như thế nào đối với mỗi năm làm việc?", options: ["Ít nhất bằng 1 tháng tiền lương cho mỗi năm làm việc", "0,5 tháng tiền lương", "2 tháng tiền lương", "Không có trợ cấp"], answer: 0, chapter: "Chương 5", exp: "Căn cứ Điều 47, trợ cấp mất việc làm ít nhất bằng 1 tháng tiền lương cho mỗi năm làm việc." },
+        { q: "Thời hạn thanh toán tiền lương do hai bên thỏa thuận nhưng phải đảm bảo bao lâu phải trả một lần đối với người lao động hưởng lương tháng?", options: ["Được trả 1 tháng 1 lần hoặc nửa tháng 1 lần", "1 năm 1 lần", "3 tháng 1 lần", "Theo quý"], answer: 0, chapter: "Chương 6 (Tiền lương)", exp: "Căn cứ Điều 97, lương tháng được trả 1 tháng hoặc nửa tháng 1 lần." },
+        { q: "Khi trả lương, người sử dụng lao động phải cung cấp cho người lao động bảng kê khai tiền lương bao gồm những gì?", options: ["Chi tiết tiền lương, tiền lương làm thêm giờ, tiền thưởng...", "Chỉ ghi tổng số tiền", "Không cần bảng kê", "Ghi tên giám đốc"], answer: 0, chapter: "Chương 6 (Tiền lương)", exp: "Căn cứ khoản 3 Điều 95, NSDLĐ phải gửi bảng kê trả lương chi tiết cho NLĐ." },
+        { q: "Tiền lương làm việc vào ban ngày trong ngày nghỉ hằng tuần được tính ít nhất bằng bao nhiêu phần trăm nếu không làm thêm?", options: ["Tính theo thỏa thuận nhưng phải đảm bảo quy định chung", "100%", "300%", "400%"], answer: 0, chapter: "Chương 6 (Tiền lương)", exp: "Ngày nghỉ hằng tuần nếu đã được hưởng lương theo chế độ thì tính theo quy định nội bộ hoặc hợp đồng." },
+        { q: "Trường hợp thiên tai, hỏa hoạn buộc phải ngừng việc, tiền lương ngừng việc do hai bên thỏa thuận nhưng không được thấp hơn mức nào?", options: ["Mức lương tối thiểu", "Không phải trả lương", "Bằng 50% lương tối thiểu", "Bằng mức lương thử việc"], answer: 0, chapter: "Chương 6 (Tiền lương)", exp: "Căn cứ khoản 3 Điều 99, ngừng việc do sự cố khách quan (thiên tai, hỏa hoạn) thì tiền lương do hai bên thỏa thuận nhưng không thấp hơn mức lương tối thiểu." },
+        { q: "Người lao động cao tuổi (nam trên 60, nữ trên 55) khi làm việc có được thỏa thuận rút ngắn thời giờ làm việc không?", options: ["Được quyền thỏa thuận với người sử dụng lao động", "Bắt buộc phải nghỉ việc", "Không được làm việc nữa", "Phải làm việc gấp đôi"], answer: 0, chapter: "Chương 12 (Mở rộng)", exp: "Căn cứ Điều 149, người lao động cao tuổi được quyền thỏa thuận rút ngắn thời giờ làm việc." },
+        { q: "Doanh nghiệp có từ bao nhiêu lao động trở lên bắt buộc phải ban hành nội quy lao động bằng văn bản?", options: ["Từ 10 người lao động trở lên", "Dưới 10 người", "Trên 100 người", "Từ 50 người trở lên"], answer: 0, chapter: "Chương 10 (Nội quy)", exp: "Căn cứ khoản 1 Điều 118, sử dụng từ 10 người lao động trở lên phải có nội quy lao động bằng văn bản." },
+        { q: "Nội quy lao động trước khi ban hành phải có ý kiến của tổ chức nào tại cơ sở?", options: ["Tổ chức đại diện người lao động tại cơ sở", "Cơ quan công an", "Ủy ban nhân dân quận", "Sở kế hoạch đầu tư"], answer: 0, chapter: "Chương 10 (Nội quy)", exp: "Nội quy lao động phải tham khảo ý kiến tổ chức đại diện NLĐ tại cơ sở trước khi ban hành." },
+        { q: "Hành vi quấy rối tình dục tại nơi làm việc có bị pháp luật lao động nghiêm cấm không?", options: ["Nghiêm cấm tuyệt đối", "Được phép nếu thỏa thuận", "Tùy thuộc quy chế công ty", "Không được đề cập trong luật"], answer: 0, chapter: "Chương 2 & 10", exp: "BLLĐ 2019 nghiêm cấm hành vi quấy rối tình dục tại nơi làm việc." },
+        { q: "Khi người lao động đơn phương chấm dứt hợp đồng trái pháp luật, họ phải bồi thường cho người sử dụng lao động những gì?", options: ["Nửa tháng tiền lương + tiền lương tương ứng với số ngày không báo trước + chi phí đào tạo (nếu có)", "Không phải bồi thường gì", "Bồi thường toàn bộ tài sản công ty", "Bồi thường 10 năm tiền lương"], answer: 0, chapter: "Chương 5", exp: "Căn cứ Điều 40, nghĩa vụ khi NLĐ đơn phương chấm dứt hợp đồng trái pháp luật." },
+        { q: "Mức lương tối thiểu được thiết lập theo vùng, ấn định theo đơn vị nào?", options: ["Theo tháng, theo giờ", "Theo năm", "Theo tuần", "Theo sản phẩm cố định"], answer: 0, chapter: "Chương 6 (Tiền lương)", exp: "Căn cứ khoản 1 Điều 91, mức lương tối thiểu ấn định theo tháng và theo giờ." },
+        { q: "Cơ quan nào quyết định công bố mức lương tối thiểu hằng năm sau khi tham khảo Hội đồng tiền lương quốc gia?", options: ["Chính phủ", "Bộ Quốc phòng", "Quốc hội", "Thủ tướng trực tiếp quyết định cá nhân"], answer: 0, chapter: "Chương 6", exp: "Chính phủ quyết định và công bố mức lương tối thiểu trên cơ sở khuyến nghị của Hội đồng tiền lương quốc gia." },
+        { q: "Người lao động nước ngoài làm việc tại Việt Nam bắt buộc phải có giấy phép nào do cơ quan nhà nước cấp?", options: ["Giấy phép lao động (Work Permit) trừ trường hợp đặc biệt", "Thẻ căn cước công dân Việt Nam", "Hộ chiếu ngoại giao", "Bằng lái xe quốc tế"], answer: 0, chapter: "Chương 13 (Mở rộng)", exp: "Lao động nước ngoài vào làm việc tại VN phải có giấy phép lao động do cơ quan có thẩm quyền cấp." },
+        { q: "Thời hạn tối đa của một giấy phép lao động cho người lao động nước ngoài là bao lâu?", options: ["Không quá 2 năm", "5 năm", "1 năm", "10 năm"], answer: 0, chapter: "Chương 13 (Mở rộng)", exp: "Giấy phép lao động cho người nước ngoài có thời hạn tối đa là 2 năm và có thể gia hạn 1 lần." },
+        { q: "Thanh tra lao động nhà nước có quyền hạn nào khi tiến hành thanh tra tại doanh nghiệp?", options: ["Kiểm tra, thanh tra bất cứ lúc nào mà không cần báo trước trong phạm vi nhiệm vụ", "Phải báo trước 1 năm", "Chỉ được xem giấy tờ qua mạng", "Không được vào xưởng sản xuất"], answer: 0, chapter: "Chương 16 (Mở rộng)", exp: "Thanh tra lao động có quyền thanh tra trực tiếp các cơ sở sản xuất kinh doanh." },
+        { q: "Người lao động bị tai nạn lao động làm suy giảm khả năng lao động từ bao nhiêu phần trăm trở lên thì được hưởng trợ cấp hằng tháng?", options: ["Từ 31% trở lên", "Từ 10% trở lên", "Từ 50% trở lên", "100%"], answer: 0, chapter: "Chương 12 (Bảo hiểm)", exp: "Luật An toàn, vệ sinh lao động (liên quan BLLĐ) quy định suy giảm từ 31% trở lên được hưởng trợ cấp tai nạn lao động hằng tháng." },
+        { q: "Khi người lao động bị tai nạn lao động do lỗi của chính họ, người sử dụng lao động có phải trợ cấp không?", options: ["Vẫn phải trợ cấp ít nhất bằng 40% mức quy định đối với trường hợp do lỗi của NSDLĐ", "Không phải bồi thường một xu", "Sa thải ngay lập tức", "Phạt tiền người lao động"], answer: 0, chapter: "Chương 12", exp: "Thậm chí do lỗi của NLĐ thì NSDLĐ vẫn phải hỗ trợ một khoản trợ cấp theo quy định." },
+        { q: "Thời gian nghỉ thai sản của lao động nữ sinh con thông thường là bao lâu?", options: ["6 tháng", "4 tháng", "3 tháng", "1 năm"], answer: 0, chapter: "Chương 10 (Thai sản)", exp: "Lao động nữ sinh con được nghỉ sinh con 6 tháng (theo Luật BHXH và BLLĐ)." },
+        { q: "Trường hợp lao động nữ sinh đôi trở lên, tính từ con thứ hai trở đi, cứ mỗi con được nghỉ thêm bao nhiêu tháng?", options: ["Thêm 1 tháng cho mỗi con", "Thêm 6 tháng", "Không được nghỉ thêm", "Thêm 2 tháng"], answer: 0, chapter: "Chương 10", exp: "Sinh đôi trở lên, tính từ con thứ hai trở đi, người mẹ được nghỉ thêm 1 tháng cho mỗi con." },
+        { q: "Nam lao động đang đóng bảo hiểm xã hội khi vợ sinh con được nghỉ chế độ thai sản mấy ngày làm việc (trường hợp sinh thường)?", options: ["Ít nhất 5 ngày làm việc", "1 ngày", "30 ngày", "3 ngày"], answer: 0, chapter: "Chương 10", exp: "Nam lao động vợ sinh con được nghỉ từ 5 đến 14 ngày làm việc tùy hình thức sinh." },
+        { q: "Mức bồi thường thiệt hại khi người lao động làm hư hỏng dụng cụ thiết bị sơ suất không quá mức nào nếu thiệt hại dưới 10 tháng lương tối thiểu vùng?", options: ["Không quá 3 tháng tiền lương", "Không quá 1 tháng tiền lương", "Không quá 10 tháng", "Phải đền toàn bộ"], answer: 0, chapter: "Chương 10 (Trách nhiệm vật chất)", exp: "Căn cứ Điều 129, sơ suất làm hư hỏng dụng cụ thiết bị dưới 10 tháng lương tối thiểu thì bồi thường tối đa 3 tháng tiền lương." },
+        { q: "Hình thức xử lý kỷ luật nào không được áp dụng đối với người lao động?", options: ["Phạt tiền, trừ lương thay cho kỷ luật", "Khiển trách", "Sa thải", "Kéo dài nâng lương"], answer: 0, chapter: "Chương 10", exp: "Căn cứ khoản 2 Điều 127, tuyệt đối cấm hành vi dùng hình thức phạt tiền, cắt lương thay cho xử lý kỷ luật lao động." },
+        { q: "Khi xử lý kỷ luật lao động, bắt buộc phải có sự tham gia của tổ chức nào tại cơ sở?", options: ["Tổ chức đại diện người lao động tại cơ sở mà người lao động đó là thành viên", "Cơ quan công an xã", "Tòa án nhân dân", "Hội đồng nhân dân"], answer: 0, chapter: "Chương 10", exp: "Căn cứ điểm b khoản 1 Điều 122, phải có sự tham gia của tổ chức đại diện NLĐ tại cơ sở." },
+        { q: "Người lao động có quyền khởi kiện trực tiếp ra Tòa án giải quyết tranh chấp lao động cá nhân trong trường hợp nào sau đây?", options: ["Trường hợp về bồi thường thiệt hại, trợ cấp khi thôi việc, đơn phương chấm dứt hợp đồng... mà không bắt buộc qua hòa giải", "Mọi trường hợp đều phải qua hòa giải", "Không bao giờ được ra tòa", "Chỉ qua trọng tài"], answer: 0, chapter: "Chương 14", exp: "Một số tranh chấp đặc thù như về bồi thường thiệt hại, trợ cấp... không bắt buộc qua thủ tục hòa giải của hòa giải viên." },
+        { q: "Thời hiệu yêu cầu Tòa án giải quyết tranh chấp lao động cá nhân là bao lâu kể từ ngày phát hiện hành vi vi phạm?", options: ["1 năm", "3 năm", "6 tháng", "5 năm"], answer: 0, chapter: "Chương 14", exp: "Căn cứ Điều 190, thời hiệu yêu cầu tòa án giải quyết tranh chấp lao động cá nhân là 1 năm." },
+        { q: "Trong thời gian đình công, người lao động không tham gia đình công nhưng phải ngừng việc vì lý do đình công thì được trả lương như thế nào?", options: ["Được trả lương theo thỏa thuận nhưng không thấp hơn mức lương tối thiểu và các quyền lợi khác", "Không được trả lương", "Chỉ trả 50%", "Bị sa thải"], answer: 0, chapter: "Chương 14", exp: "NLĐ không đình công phải ngừng việc do đình công được bảo vệ quyền lợi và trả lương tối thiểu." },
+        { q: "Quyết định hoãn đình công hoặc đình chỉ đình công thuộc thẩm quyền của cơ quan nào?", options: ["Ủy ban nhân dân cấp tỉnh", "Giám đốc doanh nghiệp", "Công đoàn cơ sở", "Bộ trưởng Bộ Công an"], answer: 0, chapter: "Chương 14", exp: "UBND cấp tỉnh có quyền quyết định hoãn hoặc đình chỉ đình công nếu xét thấy ảnh hưởng nghiêm trọng đến kinh tế - xã hội." },
+        { q: "Hợp đồng lao động giao kết với người từ đủ 15 tuổi đến chưa đủ 18 tuổi phải có sự đồng ý bằng văn bản của ai?", options: ["Người đại diện theo pháp luật của họ", "Chỉ cần bản thân họ", "Ủy ban nhân dân", "Giám đốc sở giáo dục"], answer: 0, chapter: "Chương 11", exp: "Căn cứ điểm b khoản 1 Điều 69, người chưa đủ 18 tuổi ký hợp đồng phải có sự đồng ý của người đại diện theo pháp luật." },
+        { q: "Thời giờ làm việc của người chưa đủ 15 tuổi (từ đủ 13 đến dưới 15 tuổi) tối đa không quá bao nhiêu giờ trong một ngày?", options: ["Không quá 4 giờ trong 1 ngày và 20 giờ trong 1 tuần", "8 giờ trong 1 ngày", "10 giờ trong 1 ngày", "Không được làm việc"], answer: 0, chapter: "Chương 11", exp: "Căn cứ điểm b khoản 1 Điều 146, lao động từ đủ 13 đến dưới 15 tuổi chỉ làm tối đa 4 giờ/ngày và 20 giờ/tuần." },
+        { q: "Người lao động làm việc theo mùa vụ hoặc công việc nhất định có thời hạn dưới 12 tháng có được giao kết hợp đồng lao động không?", options: ["Có, vẫn áp dụng quy định hợp đồng lao động xác định thời hạn", "Không được phép", "Phải làm hợp đồng dân sự", "Chỉ dùng lời nói"], answer: 0, chapter: "Chương 5", exp: "BLLĐ 2019 đã gộp hợp đồng mùa vụ dưới 12 tháng vào chung nhóm hợp đồng xác định thời hạn." }
+    ];
+
+    let currentQuiz = [];
+    let currentIndex = 0;
+    let userAnswers = {};
+    let timer = null;
+    let timeLeft = 1800; // 30 phút = 1800 giây
+    let wrongQuestions = JSON.parse(localStorage.getItem('wrong_llđ_100') || '[]');
+
+    document.getElementById('wrong-count').innerText = wrongQuestions.length;
+
+    function toggleTheme() {
+        const body = document.body;
+        body.getAttribute('data-theme') === 'dark' ? body.setAttribute('data-theme', 'light') : body.setAttribute('data-theme', 'dark');
+    }
+
+    function startQuiz() {
+        // Lấy ngẫu nhiên 20 câu từ ngân hàng 100 câu
+        currentQuiz = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 20);
+        currentIndex = 0;
+        userAnswers = {};
+        
+        document.getElementById('home-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+        
+        startTimer();
+        renderQuestion();
+    }
+
+    function startTimer() {
+        timeLeft = 1800;
+        clearInterval(timer);
+        timer = setInterval(() => {
+            timeLeft--;
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            document.getElementById('timer-display').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                submitQuiz();
+            }
+        }, 1000);
+    }
+
+    function renderQuestion() {
+        const q = currentQuiz[currentIndex];
+        document.getElementById('progress-text').innerText = `Câu ${currentIndex + 1}/${currentQuiz.length} (${q.chapter})`;
+        
+        let html = `<div class="question-box"><h3>${q.q}</h3><div class="options">`;
+        q.options.forEach((opt, idx) => {
+            let checked = userAnswers[currentIndex] === idx ? 'checked' : '';
+            html += `<label><input type="radio" name="question" value="${idx}" ${checked} onclick="saveAnswer(${currentIndex}, ${idx})"> ${opt}</label>`;
+        });
+        html += `</div></div>`;
+        
+        document.getElementById('question-container').innerHTML = html;
+        
+        document.getElementById('prev-btn').style.display = currentIndex === 0 ? 'none' : 'inline-block';
+        if (currentIndex === currentQuiz.length - 1) {
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+        } else {
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('submit-btn').style.display = 'none';
+        }
+    }
+
+    function saveAnswer(qIdx, optIdx) {
+        userAnswers[qIdx] = optIdx;
+    }
+
+    function nextQuestion() {
+        if (currentIndex < currentQuiz.length - 1) { currentIndex++; renderQuestion(); }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) { currentIndex--; renderQuestion(); }
+    }
+
+    function submitQuiz() {
+        clearInterval(timer);
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.add('active');
+
+        let score = 0;
+        let reviewHtml = '';
+
+        currentQuiz.forEach((q, idx) => {
+            let userAns = userAnswers[idx];
+            let isCorrect = userAns === q.answer;
+            if (isCorrect) score++;
+            else {
+                if (!wrongQuestions.some(item => item.q === q.q)) {
+                    wrongQuestions.push(q);
+                }
+            }
+
+            reviewHtml += `<div class="result-item ${isCorrect ? 'correct' : 'wrong'}">
+                <strong>Câu ${idx + 1} (${q.chapter}): ${q.q}</strong><br>
+                Đáp án của bạn: <b>${userAns !== undefined ? q.options[userAns] : 'Chưa chọn'}</b><br>
+                Đáp án đúng: <b>${q.options[q.answer]}</b>
+                <div class="explanation">💡 <b>Giải thích:</b> ${q.exp}</div>
+            </div>`;
+        });
+
+        localStorage.setItem('wrong_llđ_100', JSON.stringify(wrongQuestions));
+        document.getElementById('wrong-count').innerText = wrongQuestions.length;
+        document.getElementById('score-summary').innerText = `Kết quả của bạn: ${score} / ${currentQuiz.length} câu đúng`;
+        document.getElementById('review-container').innerHTML = reviewHtml;
+    }
+
+    function viewWrongQuestions() {
+        if (wrongQuestions.length === 0) {
+            alert('Hiện tại danh sách câu sai đang trống! Hãy làm bài thi thử để hệ thống ghi nhận nhé.');
+            return;
+        }
+        currentQuiz = [...wrongQuestions];
+        currentIndex = 0;
+        userAnswers = {};
+        document.getElementById('home-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+        document.getElementById('timer-display').innerText = "Ôn tập lỗi";
+        renderQuestion();
+    }
+
+    function goHome() {
+        document.getElementById('result-screen').classList.remove('active');
+        document.getElementById('home-screen').classList.add('active');
+    }
+</script>
+</body>
+</html>
